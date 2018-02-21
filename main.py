@@ -16,7 +16,9 @@ INITIAL_POSITION = [0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0,
 
 class Backgammon:
     def __init__(self):
-        pass
+        self.turn = WHITE_COLOUR
+        self.whites = list(INITIAL_POSITION)
+        self.blacks = list(INITIAL_POSITION)
 
     def build_numbers_str(self, begin, end, step=1):
         numbers = "  "
@@ -58,7 +60,7 @@ class Backgammon:
 
         return line
 
-    def display_board(self, whites, blacks):
+    def display_board(self):
         #   Initial position:
         #
         #   13   14   15   16   17   18  | 19   20   21   22   23   24
@@ -90,29 +92,66 @@ class Backgammon:
         print(top_border)
 
         for i in range(BOARD_HEIGHT / 2):
-            print(self.build_line(whites[12:], blacks[:12][::-1], i + 1))
+            print(self.build_line(self.whites[12:], self.blacks[:12][::-1], i + 1))
 
         print(middle_line)
 
         for i in range(BOARD_HEIGHT / 2):
-            print(self.build_line(whites[:12][::-1], blacks[12:], (BOARD_HEIGHT / 2) - i))
+            print(self.build_line(self.whites[:12][::-1], self.blacks[12:], (BOARD_HEIGHT / 2) - i))
         
         print(bottom_border)
         print(bottom_numbers)
 
+    def change_turn(self):
+        if self.turn == WHITE_COLOUR:
+            self.turn = BLACK_COLOUR
+        else:
+            self.turn = WHITE_COLOUR
+
+    def perform_move(self, moves, dice1, dice2):
+        # Dumb movements for now (TODO: implement properly).
+        # Always assume that dice1 >= dice2.
+
+        # Split the moves input.
+        moves = [int(i) - 1 for i in moves.split()]
+
+        if self.turn == WHITE_COLOUR:
+            no_moves = 2
+            if dice1 == dice2:
+                no_moves = 4
+                
+            for i in range(no_moves):
+                self.whites[moves[i]] -= 1
+            
+            self.whites[moves[0] - dice1] += 1
+            if no_moves == 2:
+                self.whites[moves[1] - dice2] += 1
+            else:
+                self.whites[moves[1] - dice1] += 1
+                self.whites[moves[2] - dice1] += 1
+                self.whites[moves[3] - dice1] += 1
+            
+        self.display_board()
+
     def play(self):
         print("Backgammon Game\n")
-        self.display_board(INITIAL_POSITION, INITIAL_POSITION)
-
-        print("Press 'r' to roll, 'x' to exit...")
+        self.display_board()
 
         while True:
-            key = raw_input()
+            key = raw_input("Press 'r' to roll, 'x' to exit... ")
 
             if key == "r":
-                dice1 = random.randint(1, 6)
-                dice2 = random.randint(1, 6)
-                print("  You rolled [{0}-{1}]".format(max(dice1, dice2), min(dice1, dice2)))
+                r1 = random.randint(1, 6)
+                r2 = random.randint(1, 6)
+                dice1 = max(r1, r2)
+                dice2 = min(r1, r2)
+                print("  You rolled [{0}-{1}]. Enter moves (space-separated). Note: higher dice moved first.".format(dice1, dice2))
+
+                moves = raw_input(SPACE_SEP * 4)
+                print("  Your moves are: {0}\n".format(moves))
+
+                self.perform_move(moves, dice1, dice2)
+                self.change_turn()
             elif key == "x":
                 break
             else:
