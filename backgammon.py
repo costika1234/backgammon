@@ -2,7 +2,7 @@ from constants import *
 from utils import Utils
 
 class Backgammon:
-    def __init__(self, manual_dice=[], debug_mode=False):
+    def __init__(self, known_dice=[], known_moves=[], terminate_on_auto=False, suppress_output=False):
         # Assume turn is either 0 (white) or 1 (black).
         self.turn = 0
 
@@ -10,10 +10,17 @@ class Backgammon:
         self.players = [list(INITIAL_POSITION), list(INITIAL_POSITION)]
 
         # List of non-generated dice.
-        self.manual_dice = manual_dice
+        self.known_dice = known_dice
 
-        # Flag to enable debug information.
-        self.debug_mode = debug_mode
+        # List of moves known in advance 
+        self.known_moves = known_moves
+
+        # Flag which specifies whether the game is terminated if given initial
+        # moves and corresponding dice (useful for automated tests).
+        self.terminate_on_auto = terminate_on_auto
+
+        # Flag which specifies whether console output is suppressed or not.
+        self.suppress_output = suppress_output
 
     def change_turn(self):
         self.turn = (self.turn + 1) % 2
@@ -43,33 +50,55 @@ class Backgammon:
             player_to_move[moves[3] - dice1] += 1
             
     def roll_dice(self):
-        if len(self.manual_dice) != 0:
-            dice = self.manual_dice[0]
-            self.manual_dice = self.manual_dice[1:]
-            return dice
+        dice = (0, 0)
+        if len(self.known_dice) != 0:
+            known_dice = self.known_dice[0]
+            self.known_dice = self.known_dice[1:]
+            dice = Utils.get_ordered_dice(known_dice)
         else:
-            return Utils.roll_dice()
+            dice = Utils.roll_dice()
 
+        Utils.print_to_console(
+            "  You rolled [{0}-{1}]. Enter moves (space-separated)"
+            ". Note: higher dice moved first (if possible)".format(dice[0], dice[1]),
+            self.suppress_output)
+
+        return dice
+
+    def enter_moves(self):
+        moves = ""
+        if len(self.known_moves) != 0:
+            moves = self.known_moves[0]
+            self.known_moves = self.known_moves[1:] 
+            moves = " ".join(map(str, list(moves)))
+        else:
+            moves = raw_input(SPACE_SEP * 4)
+
+        Utils.print_to_console("    Your moves are: {0}\n".format(moves), self.suppress_output)
+
+        return moves
+
+    def get_play_mode(self):
+        if len(self.known_moves) == len(self.known_dice) and len(self.known_moves) > 0:
+            return AUTO
+        elif len(self.known_moves) == 0 and self.terminate_on_auto:
+            return EXIT
+        else:
+            return raw_input("Press 'r' to roll, 'x' to exit... ")
 
     def play(self):
-        print("Backgammon Game\n")
-        Utils.display_board(self.players)
+        Utils.display_board(self.players, self.suppress_output)
 
         while True:
-            key = raw_input("Press 'r' to roll, 'x' to exit... ")
+            mode = self.get_play_mode()
 
-            if key == "r":
+            if mode == ROLL or mode == AUTO:
                 (dice1, dice2) = self.roll_dice()
-                print("  You rolled [{0}-{1}]. Enter moves (space-separated). Note: higher dice moved first.".format(dice1, dice2))
-
-                moves = raw_input(SPACE_SEP * 4)
-                print("  Your moves are: {0}\n".format(moves))
-
+                moves = self.enter_moves()
                 self.perform_move(moves, dice1, dice2)
                 self.change_turn()
-
-                Utils.display_board(self.players)
-            elif key == "x":
+                Utils.display_board(self.players, self.suppress_output)
+            elif mode == EXIT:
                 break
             else:
                 print("Unknown command, try again.")

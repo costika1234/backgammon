@@ -9,3 +9,8 @@ WHITE_COLOUR = "W"
 BLACK_COLOUR = "B"
 INITIAL_POSITION = [0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0,
                     5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]
+
+# Modes
+AUTO = "auto"
+EXIT = "x"
+ROLL = "r"

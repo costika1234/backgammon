@@ -1,3 +1,5 @@
+#!/usr/local/bin/python
+
 import unittest
 
 from backgammon import Backgammon
@@ -21,6 +23,19 @@ class TestBackgammonGame(unittest.TestCase):
 
         (dice1, dice2) = Utils.roll_dice()
         self.assertFalse(dice1 < dice2)        
+
+    def test_one_simple_move_each(self):
+        self.game = Backgammon(known_dice=[(6, 6), (6, 3)], 
+                               known_moves=[(24, 24, 13, 13), (17, 17)],
+                               terminate_on_auto=True,
+                               suppress_output=True)
+        self.game.play()
+        self.assertEquals(self.game.players[0], 
+                          [0, 0, 0, 0, 0, 5, 2, 3, 0, 0, 0, 0, 
+                           3, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0])
+        self.assertEquals(self.game.players[1], 
+                          [0, 1, 0, 0, 1, 5, 0, 1, 0, 0, 0, 0,
+                           5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2])
 
 
 if __name__ == '__main__':

@@ -4,11 +4,15 @@ from constants import *
 
 class Utils:
     @staticmethod
+    def get_ordered_dice((d1, d2)):
+        return (max(d1, d2), min(d1, d2))
+
+    @staticmethod
     def roll_dice():
         # Always return (max_dice, min_dice)
         r1 = random.randint(1, 6)
         r2 = random.randint(1, 6)
-        return (max(r1, r2), min(r1, r2))
+        return Utils.get_ordered_dice((r1, r2))
 
     @staticmethod
     def build_numbers_str(begin, end, step=1):
@@ -47,7 +51,7 @@ class Utils:
         return line
 
     @staticmethod
-    def display_board(players):
+    def display_board(players, suppress_output):
         #   Initial position:
         #
         #   13   14   15   16   17   18  | 19   20   21   22   23   24
@@ -69,6 +73,9 @@ class Utils:
         #   12   11   10    9    8    7  |  6    5    4    3    2    1
         #
 
+        if suppress_output:
+            return
+
         top_border = bottom_border = SPACE_SEP + HORIZONTAL_SEP * BOARD_WIDTH
         top_numbers = Utils.build_numbers_str(NO_PIECES / 2 + 1, NO_PIECES + 1)
         middle_line = VERTICAL_SEP + SPACE_SEP * (BOARD_WIDTH / 2) + VERTICAL_SEP \
@@ -88,3 +95,8 @@ class Utils:
         
         print(bottom_border)
         print(bottom_numbers + "\n")
+
+    @staticmethod
+    def print_to_console(message, suppress_output):
+        if not suppress_output:
+            print(message)
