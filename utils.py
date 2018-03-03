@@ -87,5 +87,4 @@ class Utils:
             print(Utils.build_line(players[0][:12][::-1], players[1][12:], (BOARD_HEIGHT / 2) - i))
         
         print(bottom_border)
-        print(bottom_numbers)
-
+        print(bottom_numbers + "\n")

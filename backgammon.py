@@ -2,16 +2,18 @@ from constants import *
 from utils import Utils
 
 class Backgammon:
-    def __init__(self, debug_mode=False):
+    def __init__(self, manual_dice=[], debug_mode=False):
         # Assume turn is either 0 (white) or 1 (black).
         self.turn = 0
 
         # Player 1 (white) followed by player 2 (black).
         self.players = [list(INITIAL_POSITION), list(INITIAL_POSITION)]
 
+        # List of non-generated dice.
+        self.manual_dice = manual_dice
+
         # Flag to enable debug information.
         self.debug_mode = debug_mode
-
 
     def change_turn(self):
         self.turn = (self.turn + 1) % 2
@@ -40,6 +42,15 @@ class Backgammon:
             player_to_move[moves[2] - dice1] += 1
             player_to_move[moves[3] - dice1] += 1
             
+    def roll_dice(self):
+        if len(self.manual_dice) != 0:
+            dice = self.manual_dice[0]
+            self.manual_dice = self.manual_dice[1:]
+            return dice
+        else:
+            return Utils.roll_dice()
+
+
     def play(self):
         print("Backgammon Game\n")
         Utils.display_board(self.players)
@@ -48,7 +59,7 @@ class Backgammon:
             key = raw_input("Press 'r' to roll, 'x' to exit... ")
 
             if key == "r":
-                (dice1, dice2) = Utils.roll_dice()
+                (dice1, dice2) = self.roll_dice()
                 print("  You rolled [{0}-{1}]. Enter moves (space-separated). Note: higher dice moved first.".format(dice1, dice2))
 
                 moves = raw_input(SPACE_SEP * 4)
